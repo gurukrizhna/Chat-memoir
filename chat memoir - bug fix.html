@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Memoir</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font family -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            padding: 0; /* Remove body padding so splash is truly full screen */
+        }
+
+        /* --- LOADING SPINNER STYLES --- */
+        .loader {
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #10b981; /* WhatsApp Green */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- SPLASH SCREEN ELEMENTS ENTRANCE (Subtle) --- */
+        @keyframes splash-fade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .splash-element {
+            opacity: 0;
+            animation: splash-fade 0.5s ease-out forwards;
+        }
+        /* ------------------------------------ */
+
+        /* --- STYLES FOR SCREEN VIEW --- */
+        .chat-screen-view {
+            width: 100%;
+            max-width: 400px; /* Fixed mobile ratio width for preview */
+            max-height: 711px;
+            margin: 0 auto;
+            min-height: 80vh;
+            background-color: #ece5dd; 
+            position: relative;
+            overflow-y: auto;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-bubble {
+            padding: 10px 14px; 
+            border-radius: 10px;
+            margin-bottom: 8px;
+            max-width: 80%;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.08); 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        /* Sender (Your messages) - Green, Right Aligned */
+        .bubble-me {
+            background-color: #dcf8c6 !important;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+
+        /* Contact (Their messages) - White, Left Aligned */
+        .bubble-contact {
+            background-color: #ffffff !important;
+            margin-right: auto;
+            border-bottom-left-radius: 2px;
+        }
+        
+        /* Date Separator Style */
+        .date-separator {
+            background-color: rgba(255, 255, 255, 0.7) !important;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 4px 8px;
+            border-radius: 8px;
+            color: #666; 
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Time stamp style */
+        .time-subscript {
+            font-size: 0.65rem; 
+            line-height: 1; 
+            vertical-align: sub; 
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Theme selector block styles */
+        .theme-option {
+            width: 50px; 
+            height: 70px; 
+            border: 3px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0; 
+        }
+        .theme-option.selected {
+            border-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        .theme-option span {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+        .theme-gallery-container {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px; 
+        }
+        .theme-gallery-inner {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Set padding back on main content */
+        #main-content {
+            padding: 1rem; /* p-4 equivalent */
+            min-height: 100vh;
+        }
+        @media (min-width: 768px) {
+            #main-content {
+                padding: 2rem; /* md:p-8 equivalent */
+            }
+        }
+
+
+        /* --- CRITICAL PRINT STYLES (@media print) --- */
+        @page { margin: 0; padding: 0; }
+        @media print {
+            
+            /* The only change made: ensuring the cover page takes a full page and forces a break */
+            #pdf-cover-page {
+                page-break-after: always !important; 
+                display: flex !important;
+                height: 100vh !important; 
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            body, html {
+                -webkit-print-color-adjust: exact !important; 
+                color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+            #splash-screen { display: none !important; }
+
+            html, body {
+                margin: 0; padding: 0; background: none;
+                width: 100% !important; height: auto !important; min-height: 100vh !important;
+                background-color: var(--print-bg-color, white) !important;
+                background-image: var(--print-bg-image, none) !important; 
+                background-size: contain !important; 
+                background-position: center center !important;
+                background-repeat: no-repeat !important;
+                background-attachment: fixed !important;
+            }
+            
+            #chat-container {
+                width: 95% !important; max-width: none !important; height: auto; max-height: none;
+                box-shadow: none;
+                padding: 20px 2.5% !important; 
+                background-color: transparent !important; 
+                overflow: visible; display: block;
+                column-count: 2 !important;
+                column-gap: 30px !important; 
+                column-fill: auto !important; 
+            }
+
+            .chat-bubble {
+                width: fit-content !important; 
+                padding: 12px 18px !important; 
+                font-size: 11pt !important;
+                line-height: 1.4 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid-column !important;
+                break-inside: avoid-page !important;
+                -webkit-column-break-inside: avoid !important;
+            }
+            
+            .chat-bubble p { font-size: 11pt !important; }
+            .chat-bubble span.font-semibold { font-size: 9pt !important; }
+            .date-separator { font-size: 10pt !important; }
+            .time-subscript { vertical-align: sub !important; font-size: 8pt !important; display: inline-block !important; }
+            .chat-screen-view { display: block; }
+        }
+    </style>
+    <!-- Firebase Imports for required environment setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        if (Object.keys(firebaseConfig).length > 0) {
+            setLogLevel('Debug');
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+            
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+            onAuthStateChanged(window.auth, async (user) => {
+                if (!user) {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(window.auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(window.auth);
+                        }
+                    } catch (error) {
+                        console.error("Firebase Auth Error:", error);
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+
+    <!-- NEW: PDF PRINT COVER PAGE -->
+    <div id="pdf-cover-page" class="hidden print:flex h-[100vh] w-full flex-col justify-center items-center text-center p-8 bg-white">
+        <!-- App Name: Big size, Green color, Center aligned -->
+        <h1 class="text-6xl sm:text-7xl font-extrabold mb-6 tracking-wide" style="color: #10b981; margin-top: -10vh;">Chat Memoir</h1>
+        <!-- Developer Name: Medium size, Normal color, Center aligned -->
+        <p class="text-xl sm:text-2xl text-gray-700 mb-2">A utility by NGK</p>
+        <!-- Contact: Medium size, Normal color, Center aligned -->
+        <p class="text-lg sm:text-xl text-gray-500">Contact: @gurukrizhna</p>
+    </div>
+    
+    <!-- SPLASH SCREEN: Fixed, White, Centered -->
+    <div id="splash-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2 splash-element" style="animation-delay: 0s;">Chat Memoir</h1>
+        
+        <!-- Simplified text: Professional and simple -->
+        <p class="text-base text-gray-500 mb-8 splash-element" style="animation-delay: 0.2s;">
+            A utility by <span class="font-semibold text-gray-700">NGK</span>
+        </p>
+
+        <!-- Loading Spinner: Now visible immediately and running (splash-element removed) -->
+        <div class="loader"></div>
+    </div>
+    
+    <!-- MAIN APP CONTENT (Initially hidden, opacity 0, padding defined in style block) -->
+    <div id="main-content" class="opacity-0 transition-opacity duration-700">
+        <div class="max-w-7xl mx-auto">
+            <!-- New Title (No animation, fixed) -->
+            <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center no-print">Chat Memoir</h1>
+            
+            <!-- Control Panel (Compact and Mobile-Optimized) -->
+            <div class="bg-white p-3 rounded-xl shadow-lg mb-3 no-print">
+                
+                <!-- Import File Section -->
+                <div class="mb-4">
+                    <label for="chatFile" class="block text-sm font-medium text-gray-700 mb-1">Import Chat File (.txt)</label>
+                    <input type="file" id="chatFile" accept=".txt" class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 p-2">
+                </div>
+
+                <!-- Theme Selection & Generate Button -->
+                <div class="md:grid md:grid-cols-4 md:gap-4 flex flex-col">
+                    
+                    <!-- Theme Section (Simplified - Color Only) -->
+                    <div class="md:col-span-3 mb-4 md:mb-0">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Theme</label>
+                        
+                        <!-- Theme Gallery Container -->
+                        <div class="theme-gallery-container">
+                            <div id="themeSelectorGallery" class="theme-gallery-inner">
+                                <!-- Theme buttons will be injected here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button (Renamed) -->
+                    <div class="md:col-span-1 flex items-end">
+                        <button onclick="generatePdf()" id="pdfButton"
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-150 ease-in-out shadow-md disabled:opacity-50"
+                            disabled>
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error/Status Message -->
+            <p id="statusMessage" class="text-center text-red-500 mb-4 no-print hidden">
+                Please import a chat file first.
+            </p>
+
+            <!-- Chat Preview and Print Container -->
+            <div class="w-full flex justify-center">
+                <div id="chat-container" class="chat-screen-view rounded-2xl">
+                    <!-- Messages will be rendered here -->
+                    <p class="text-center text-gray-500 mt-20" id="initial-message">
+                        Import your WhatsApp chat (.txt) file above to see the conversation here.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Developer and Insta Handle (MOVED TO BOTTOM, simplified text) -->
+            <p class="text-center text-xs text-gray-500 mt-6 pt-3 border-t border-gray-200 no-print">
+                A utility by <span class="font-semibold text-gray-700">NGK</span> | Instagram: <a href="https://www.instagram.com/gurukrizhna" target="_blank" class="text-blue-500 hover:text-blue-600 transition">@gurukrizhna</a>
+            </p>
+        </div>
+        
+        <!-- SENDER SELECTION MODAL (Adjusted for bottom access) -->
+        <div id="senderSelectorModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-end justify-center p-8">
+            <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Identify Yourself</h3>
+                <!-- Simplified inner content -->
+                <p id="senderSelectionMessage" class="text-sm text-gray-600 mb-4 font-semibold">
+                    Select your name to proceed:
+                </p>
+                <div id="senderOptions" class="space-y-3">
+                    <!-- Sender buttons generated here -->
+                </div>
+                <button onclick="closeSenderSelection()" 
+                        class="w-full mt-4 px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-150">
+                    Cancel and Check File
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatFile = document.getElementById('chatFile');
+        const chatContainer = document.getElementById('chat-container');
+        const pdfButton = document.getElementById('pdfButton');
+        const statusMessage = document.getElementById('statusMessage');
+        let currentChatText = ''; 
+        let currentCustomUserName = 'You'; 
+        
+        // --- THEME DEFINITIONS (50 Colors, excluding white) ---
+        const THEME_OPTIONS = {
+            color: [
+                { name: 'Soft Cream', value: '#FBF0E8' },
+                { name: 'Pale Pink', value: '#FADADD' },
+                { name: 'Blush Rose', value: '#FFD1E3' },
+                { name: 'Light Lavender', value: '#E6E6FA' },
+                { name: 'Misty Blue', value: '#E0FFFF' },
+                { name: 'Mint Green', value: '#F0FFF0' },
+                { name: 'Peach Bliss', value: '#FFE5B4' },
+                { name: 'Soft Yellow', value: '#FFFFE0' },
+                { name: 'Coral Kiss', value: '#F88379' },
+                { name: 'Dusty Rose', value: '#C9A9A6' },
+                { name: 'Powder Blue', value: '#B0E0E6' },
+                { name: 'Seafoam', value: '#93E9BE' },
+                { name: 'Thistle', value: '#D8BFD8' },
+                { name: 'Light Taupe', value: '#D3CFCF' },
+                { name: 'Cream Peach', value: '#F5E6CC' },
+                { name: 'Salmon Pink', value: '#FA8072' },
+                { name: 'Apricot', value: '#FBCEB1' },
+                { name: 'Sky Blue', value: '#87CEEB' },
+                { name: 'Periwinkle', value: '#CCCCFF' },
+                { name: 'Lavender Gray', value: '#C7C9D9' },
+                { name: 'Lemon Chiffon', value: '#FFFACD' },
+                { name: 'Honeydew', value: '#F0FFF0' },
+                { name: 'Light Cyan', value: '#E0FFFF' },
+                { name: 'Oatmeal', value: '#D2B48C' },
+                { name: 'Warm Sand', value: '#EEDC82' },
+                { name: 'Baby Pink', value: '#F4C2C2' },
+                { name: 'Parchment', value: '#F0E68C' },
+                { name: 'Soft Lilac', value: '#C8A2C8' },
+                { name: 'Antique White', value: '#FAEBD7' },
+                // 21 New Colors Added
+                { name: 'Pale Mauve', value: '#D8C6D8' },
+                { name: 'Rosewater', value: '#F5E0E9' },
+                { name: 'Tiffany Blue', value: '#A8DCD8' },
+                { name: 'Celadon', value: '#ACE1AF' },
+                { name: 'Buttercup', value: '#FAFAD2' },
+                { name: 'Amethyst', value: '#9966CC' },
+                { name: 'Fog Gray', value: '#D8D8D8' },
+                { name: 'Muted Coral', value: '#E9967A' },
+                { name: 'Sea Salt', value: '#F4F4F4' },
+                { name: 'Daffodil', value: '#FFFFAA' },
+                { name: 'Soft Iris', value: '#C3B1E1' },
+                { name: 'Robin Egg', value: '#96DED1' },
+                { name: 'Almond', value: '#EED9C4' },
+                { name: 'Cameo Pink', value: '#EBB4D2' },
+                { name: 'Salty Mist', value: '#D6EAF8' },
+                { name: 'Mallow', value: '#E0B0FF' },
+                { name: 'Cloud Pink', value: '#F7D7DA' },
+                { name: 'Warm Gray', value: '#C8C8A9' },
+                { name: 'Pale Cerulean', value: '#9ACEEB' },
+                { name: 'Faded Denim', value: '#5B7C99' },
+                { name: 'Lavender Mist', value: '#E6E6FA' }
+            ],
+        };
+        let selectedTheme = THEME_OPTIONS.color[0]; 
+        
+        // Set initial default theme color property for print CSS
+        document.documentElement.style.setProperty('--print-bg-color', selectedTheme.value); 
+        document.documentElement.style.setProperty('--print-bg-image', 'none'); 
+
+        // REGEX definitions remain the same
+        const REGEX_BRACKETED = /^\[(.*?), (.*?)\]\s*(?:-\s*)?([^:]+):\s*([\s\S]*?)(?=\n?^\[|$)/gm;
+        const REGEX_DASHED = /^(\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}[,].*?\d{1,2}:\d{1,2}(?::\d{1,2})?(?:\s(?:AM|PM|am|pm)?)?)\s*-\s*([^:]+):\s*([\s\S]*?)(?=\n?^\d{1,2}[/.-]|$)/gm;
+        const REGEX_CATCHALL = /^(.*?[\d]{1,2}:\d{1,2}.*?)\s*(?:[-:]\s*|\s*)\s*([^:]+):\s*([\s\S]*?)(?=\n?^.*?[\d]{1,2}:\d{1,2}.*?|$)/gm;
+
+        // --- Theme Selector Logic ---
+        
+        function isColorLight(hex) {
+            const color = hex.startsWith('#') ? hex.slice(1) : hex;
+            if (color.length !== 6) return true; 
+
+            const r = parseInt(color.slice(0, 2), 16);
+            const g = parseInt(color.slice(2, 4), 16);
+            const b = parseInt(color.slice(4, 6), 16);
+            const luminance = (r * 0.299 + g * 0.587 + b * 0.114);
+            return luminance > 180; 
+        }
+
+        function selectTheme(theme, element) {
+            selectedTheme = theme;
+            document.documentElement.style.setProperty('--print-bg-image', 'none'); 
+            document.documentElement.style.setProperty('--print-bg-color', theme.value);
+
+            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        function renderThemeSelector() {
+            const gallery = document.getElementById('themeSelectorGallery');
+            gallery.innerHTML = '';
+            const themes = THEME_OPTIONS.color;
+
+            themes.forEach(theme => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'theme-option';
+                optionDiv.title = theme.name;
+                
+                optionDiv.style.backgroundColor = theme.value;
+                
+                const label = document.createElement('span');
+                const isLight = isColorLight(theme.value);
+                label.className = `absolute bottom-0 left-0 right-0 ${isLight ? 'text-gray-900' : 'text-white'} text-xs text-center py-1 bg-black bg-opacity-10`;
+                label.textContent = theme.name.split(' ').map(n => n[0]).join(''); 
+                optionDiv.appendChild(label);
+                
+                if (theme === selectedTheme) {
+                    optionDiv.classList.add('selected');
+                }
+
+                optionDiv.onclick = (e) => selectTheme(theme, optionDiv);
+                
+                gallery.appendChild(optionDiv);
+            });
+        }
+        
+        // --- Initialization ---
+        window.onload = () => {
+            renderThemeSelector();
+            
+            // Ensure first theme is selected and applied on load
+            if (THEME_OPTIONS.color.length > 0) {
+                 selectTheme(THEME_OPTIONS.color[0], document.querySelector(`#themeSelectorGallery .theme-option`));
+            }
+
+            // Splash Screen Logic (1.0s delay before starting fade out)
+            const splashScreen = document.getElementById('splash-screen');
+            const mainContent = document.getElementById('main-content');
+            
+            setTimeout(() => {
+                // 1. Start fade out of splash screen (500ms duration from CSS)
+                splashScreen.style.opacity = '0';
+
+                // 2. Hide splash completely and fade in main content
+                setTimeout(() => {
+                    splashScreen.classList.add('hidden'); 
+                    mainContent.style.opacity = '1';
+                }, 500); // Wait for the splash screen's transition to finish
+
+            }, 1000); // Changed from 1800ms to 1000ms
+        };
+
+        // --- Parsing and Rendering Logic ---
+
+        function setupSenderSelection(senders) {
+            const modal = document.getElementById('senderSelectorModal');
+            const senderOptionsDiv = document.getElementById('senderOptions');
+            senderOptionsDiv.innerHTML = '';
+            
+            senders.forEach(sender => {
+                const button = document.createElement('button');
+                button.textContent = sender;
+                button.className = 'w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition duration-150 ease-in-out mt-2';
+                button.onclick = () => {
+                    currentCustomUserName = sender; 
+                    modal.classList.add('hidden');
+                    const messages = parseChat(currentChatText, currentCustomUserName);
+                    if (messages.length > 0) {
+                        renderChat(messages, currentCustomUserName);
+                    }
+                };
+                senderOptionsDiv.appendChild(button);
+            });
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeSenderSelection() {
+            document.getElementById('senderSelectorModal').classList.add('hidden');
+            chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
+            pdfButton.disabled = true;
+        }
+
+        function parseChat(text, customUserName) {
+            let messages = [];
+            let matches = [];
+            let parserType = null;
+            
+            const regexes = [REGEX_BRACKETED, REGEX_DASHED, REGEX_CATCHALL];
+
+            for (let i = 0; i < regexes.length; i++) {
+                regexes[i].lastIndex = 0; 
+                matches = [...text.matchAll(regexes[i])];
+                if (matches.length > 0) {
+                    parserType = (i === 0) ? 'bracketed' : (i === 1) ? 'dashed' : 'catchall';
+                    break;
+                }
+            }
+
+            if (parserType === null || matches.length === 0) {
+                statusMessage.textContent = "Error: Could not parse chat file. Please ensure it is a standard WhatsApp text export.";
+                statusMessage.classList.remove('hidden');
+                return messages; 
+            }
+            
+            statusMessage.classList.add('hidden'); 
+
+            matches.forEach(match => {
+                let datetime = '';
+                let senderRaw = '';
+                let message = '';
+                
+                if (parserType === 'bracketed') {
+                    datetime = `${match[1]} ${match[2]}`;
+                    senderRaw = match[3].trim();
+                    message = match[4].trim();
+                } else if (parserType === 'dashed' || parserType === 'catchall') {
+                    datetime = match[1].trim();
+                    senderRaw = match[2].trim();
+                    message = match[3].trim();
+                }
+                
+                const cleanedMessage = message.replace(/(\n\[|^\d{1,2}[/.-])/gm, '').trim(); 
+                const isMe = senderRaw.toLowerCase() === customUserName.toLowerCase().trim();
+
+                messages.push({
+                    datetime: datetime,
+                    sender: senderRaw,
+                    content: cleanedMessage,
+                    isMe: isMe
+                });
+            });
+
+            const userMessagesCount = messages.filter(m => m.isMe).length;
+
+            if (userMessagesCount === 0 && messages.length > 0) {
+                const allSenders = [...new Set(messages.map(m => m.sender))];
+                
+                const realSenders = allSenders.filter(sender => {
+                    const s = sender.toLowerCase();
+                    const isSystemMessage = s.length > 50 || 
+                                             s.includes('encrypted') || 
+                                             s.includes('messages and calls') ||
+                                             s.match(/(\d{1,2}[/.-]\d{2})/g) || 
+                                             s.length < 3 ||
+                                             !s.match(/[a-z]/i);
+                    return !isSystemMessage;
+                });
+                
+                if (realSenders.length >= 1) {
+                    if(currentCustomUserName.toLowerCase() === 'you' || !messages.some(m => m.sender === currentCustomUserName)) {
+                        setupSenderSelection(realSenders);
+                    }
+                } else {
+                    statusMessage.textContent = `Error: Chat content was parsed, but no valid sender names were identified. Please check your file format.`;
+                    statusMessage.classList.remove('hidden');
+                }
+                
+                return [];
+            }
+            
+            return messages;
+        }
+
+        function renderChat(messages, customUserName) {
+            chatContainer.innerHTML = '';
+            
+            if (messages.length === 0) {
+                chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
+                pdfButton.disabled = true;
+                return;
+            }
+
+            let lastDateOnly = null;
+
+            messages.forEach(msg => {
+                
+                let currentDateString = 'Unknown Date';
+                try {
+                    currentDateString = msg.datetime.split(/[,\s]/).filter(p => p.match(/\d/))[0] || msg.datetime.split(',')[0].trim();
+                } catch (e) {
+                    currentDateString = 'Unknown Date';
+                }
+
+                if (currentDateString !== lastDateOnly) {
+                    const separatorDiv = document.createElement('div');
+                    separatorDiv.className = 'date-separator text-center my-3 mx-auto py-1 px-2 rounded-lg break-inside-avoid';
+                    separatorDiv.textContent = currentDateString;
+                    chatContainer.appendChild(separatorDiv);
+                    lastDateOnly = currentDateString;
+                }
+
+                const bubbleDiv = document.createElement('div');
+                const contentP = document.createElement('p');
+                const footerSpan = document.createElement('span'); 
+
+                const bubbleClass = msg.isMe ? 'bubble-me' : 'bubble-contact';
+                const alignmentClass = msg.isMe ? 'self-end' : 'self-start';
+                const senderColor = msg.isMe ? 'text-gray-700' : 'text-gray-800';
+
+                bubbleDiv.className = `chat-bubble ${bubbleClass} ${alignmentClass}`;
+                
+                const senderName = document.createElement('span');
+                senderName.className = 'font-semibold text-xs mb-1';
+                
+                if (msg.isMe) {
+                    senderName.textContent = 'You';
+                    senderName.classList.add('text-green-800', 'text-right', 'w-full'); 
+                    bubbleDiv.appendChild(senderName);
+                } else {
+                    senderName.textContent = msg.sender;
+                    senderName.classList.add('text-blue-600'); 
+                    bubbleDiv.appendChild(senderName);
+                }
+
+                const messageContentWrapper = document.createElement('div');
+                messageContentWrapper.className = 'flex flex-wrap items-end w-full'; 
+                
+                contentP.className = `text-sm ${senderColor} pr-1`; 
+                contentP.style.flex = '1 1 auto'; 
+                contentP.style.wordBreak = 'break-word';
+
+                // Hyperlink detection
+                const contentWithLinks = msg.content.replace(
+                    /(https?:\/\/[^\s]+)/g, 
+                    (url) => `<a href="${url}" target="_blank" class="text-blue-500 underline">${url}</a>`
+                );
+
+                contentP.innerHTML = contentWithLinks.replace(/\n/g, '<br>');
+
+                footerSpan.className = 'time-subscript whitespace-nowrap ml-auto'; 
+                let timeMatch = msg.datetime.match(/\d{1,2}:\d{1,2}(?::\d{1,2})?(\s(?:AM|PM|am|pm))?/i);
+                footerSpan.textContent = timeMatch ? timeMatch[0] : '??:??';
+                
+                messageContentWrapper.appendChild(contentP);
+                messageContentWrapper.appendChild(footerSpan);
+
+                bubbleDiv.appendChild(messageContentWrapper);
+
+                chatContainer.appendChild(bubbleDiv);
+            });
+
+            pdfButton.disabled = false;
+            // Scroll to the bottom of the chat on successful render
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Event listener for chat file upload
+        chatFile.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentChatText = e.target.result; 
+                
+                const messages = parseChat(currentChatText, currentCustomUserName);
+                if (messages.length > 0) {
+                    renderChat(messages, currentCustomUserName);
+                } else {
+                    if (document.getElementById('senderSelectorModal').classList.contains('hidden')) {
+                        chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
+                        pdfButton.disabled = true;
+                    }
+                }
+            };
+            reader.readAsText(file);
+        });
+        
+        // Function to trigger PDF generation
+        function generatePdf() {
+            if (chatContainer.children.length > 0 && chatContainer.children[0].id !== 'initial-message') {
+                window.print();
+            } else {
+                statusMessage.textContent = "Please import a valid chat file before generating the PDF.";
+                statusMessage.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
