@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Memoir</title>
+    <title>Chat Memoir - Forensic Edition</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Use Inter font family -->
@@ -186,7 +186,6 @@
             }
             
             #chat-container {
-                page-break-before: always !important; /* FIX: Ensure chat container starts on a new page after the cover */
                 width: 95% !important; max-width: none !important; height: auto; max-height: none;
                 box-shadow: none;
                 padding: 20px 2.5% !important; 
@@ -255,6 +254,7 @@
     <div id="pdf-cover-page" class="hidden print:flex h-[100vh] w-full flex-col justify-center items-center text-center p-8 bg-white">
         <!-- App Name: Big size, Green color, Center aligned -->
         <h1 class="text-6xl sm:text-7xl font-extrabold mb-6 tracking-wide" style="color: #10b981; margin-top: -10vh;">Chat Memoir</h1>
+        <h2 class="text-2xl sm:text-3xl text-gray-500 mb-6 tracking-wide">Forensic Visualization Report</h2>
         <!-- Developer Name: Medium size, Normal color, Center aligned -->
         <p class="text-xl sm:text-2xl text-gray-700 mb-2">A utility by NGK</p>
         <!-- Contact: Medium size, Normal color, Center aligned -->
@@ -272,6 +272,7 @@
 
         <!-- Loading Spinner: Now visible immediately and running (splash-element removed) -->
         <div class="loader"></div>
+        <p class="text-xs text-gray-400 mt-4">Initializing Secure Client-Side Environment...</p>
     </div>
     
     <!-- MAIN APP CONTENT (Initially hidden, opacity 0, padding defined in style block) -->
@@ -279,6 +280,14 @@
         <div class="max-w-7xl mx-auto">
             <!-- New Title (No animation, fixed) -->
             <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center no-print">Chat Memoir</h1>
+            
+            <!-- Secure Banner -->
+            <div class="flex justify-center mb-4 no-print">
+                <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded border border-green-400 flex items-center">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    Secure Client-Side Forensic Parsing
+                </span>
+            </div>
             
             <!-- Control Panel (Compact and Mobile-Optimized) -->
             <div class="bg-white p-3 rounded-xl shadow-lg mb-3 no-print">
@@ -312,6 +321,132 @@
                             Generate
                         </button>
                     </div>
+                </div>
+            </div>
+            
+            <!-- FORENSIC ANALYSIS DASHBOARD (New Feature) -->
+            <div id="forensic-dashboard" class="bg-gray-100 p-4 rounded-xl shadow-inner mb-4 no-print hidden border border-gray-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        Forensic Analysis Data
+                    </h3>
+                    
+                    <!-- New Behavioral Badge -->
+                    <span id="behavioral-badge" class="bg-indigo-600 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-sm animate-pulse">
+                        Analyzing...
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <!-- Stat Card 1 -->
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-blue-500">
+                        <p class="text-xs text-gray-500 uppercase">Total Messages</p>
+                        <p class="text-xl font-bold text-gray-800" id="stat-total-msgs">-</p>
+                    </div>
+                    <!-- Stat Card 2 -->
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-purple-500">
+                        <p class="text-xs text-gray-500 uppercase">Date Range</p>
+                        <p class="text-xs font-bold text-gray-800 truncate" id="stat-date-range">-</p>
+                    </div>
+                    <!-- Stat Card 3 -->
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-orange-500">
+                        <p class="text-xs text-gray-500 uppercase">File Size</p>
+                        <p class="text-xl font-bold text-gray-800" id="stat-file-size">-</p>
+                    </div>
+                </div>
+
+                <!-- Engagement Health: Dry Texting & Ghosting (NEW CARD) -->
+                <div class="bg-white p-3 rounded shadow-sm mb-4 border-l-4 border-red-400">
+                    <p class="text-xs text-gray-500 uppercase mb-2">Engagement Health</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase">Dry Texting Index</p>
+                            <p class="text-lg font-bold text-gray-800" id="stat-dry-text">-</p>
+                            <p class="text-[10px] text-gray-500">msgs &lt; 4 chars</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 uppercase">Longest Silence</p>
+                            <p class="text-lg font-bold text-gray-800" id="stat-ghosting">-</p>
+                            <p class="text-[10px] text-gray-500">(Ghosting Detector)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relationship Prediction & Origin (Modified) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <!-- Relationship Prediction Card -->
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-teal-500">
+                        <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            AI Relationship Prediction
+                        </p>
+                        <p class="text-lg font-bold text-gray-800" id="relationship-prediction">Analyzing...</p>
+                        <!-- New: Breakdown Text -->
+                        <p class="text-[11px] text-teal-600 mt-1 font-semibold" id="relationship-breakdown">-</p>
+                        <p class="text-[10px] text-gray-400 italic">Based on vocabulary &amp; timing</p>
+                    </div>
+
+                    <!-- NEW: Conversation Origin Card (Updated to Daily Initiator) -->
+                    <div class="bg-white p-3 rounded shadow-sm border-l-4 border-yellow-500">
+                        <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Daily Initiator
+                        </p>
+                        <div class="flex flex-col">
+                            <p class="text-xs text-gray-400">Most Frequent Starter:</p>
+                            <p class="text-lg font-bold text-gray-800 truncate" id="origin-initiator">-</p>
+                            <p class="text-[10px] text-gray-500" id="origin-date">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participant Activity -->
+                <div class="bg-white p-3 rounded shadow-sm mb-4">
+                    <p class="text-xs text-gray-500 uppercase mb-2">Participant Activity</p>
+                    <div id="participant-stats" class="space-y-2">
+                        <!-- Bars injected via JS -->
+                    </div>
+                </div>
+
+                <!-- AI Sentiment & Keyword Analysis -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <!-- Sentiment Card -->
+                    <div class="bg-white p-3 rounded shadow-sm border-t-4 border-pink-500">
+                        <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            AI Sentiment Analysis
+                        </p>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-semibold text-gray-700" id="sentiment-label">Neutral</span>
+                            <span class="text-xs text-gray-500" id="sentiment-score">Score: 0</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="sentiment-bar" class="bg-gray-400 h-2.5 rounded-full transition-all duration-500" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Keywords Card -->
+                    <div class="bg-white p-3 rounded shadow-sm border-t-4 border-indigo-500">
+                        <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                            Top Topics (AI Extracted)
+                        </p>
+                        <div id="top-keywords" class="flex flex-wrap gap-1">
+                            <!-- Chips injected via JS -->
+                            <span class="text-xs text-gray-400 italic">Analyzing...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forensic Search -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input type="text" id="forensicSearch" onkeyup="filterChat()" 
+                        class="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500" 
+                        placeholder="Forensic Keyword Search (Filters View)...">
                 </div>
             </div>
             
@@ -360,9 +495,33 @@
         const chatContainer = document.getElementById('chat-container');
         const pdfButton = document.getElementById('pdfButton');
         const statusMessage = document.getElementById('statusMessage');
+        const forensicDashboard = document.getElementById('forensic-dashboard');
+        
         let currentChatText = ''; 
         let currentCustomUserName = 'You'; 
+        let loadedFileSize = 0; // For metadata
         
+        // --- CLIENT-SIDE AI DATASETS ---
+        // Enhanced Sentiment Lexicon (Including Emojis for "Smart" AI)
+        const SENTIMENT_LEXICON = {
+            // Words
+            'good': 2, 'great': 3, 'excellent': 4, 'amazing': 4, 'love': 3, 'happy': 3, 'awesome': 4, 'best': 3, 'thanks': 2, 'thank': 2, 'beautiful': 3, 'glad': 2, 'fun': 2, 'enjoy': 2, 'sweet': 2, 'nice': 2, 'wonderful': 4, 'cool': 1, 'liked': 2, 'likes': 2, 'excited': 3, 'win': 3, 'perfect': 3, 'lol': 1, 'haha': 1, 'hope': 1, 'safe': 1, 'yes': 1, 'ok': 1,
+            'bad': -2, 'terrible': -4, 'horrible': -4, 'hate': -3, 'worst': -4, 'sad': -3, 'sorrow': -3, 'angry': -3, 'mad': -3, 'annoying': -2, 'disappointed': -3, 'sorry': -1, 'cry': -2, 'crying': -2, 'awful': -3, 'pain': -2, 'hurt': -2, 'scared': -2, 'fear': -2, 'gross': -2, 'stupid': -2, 'fail': -2, 'lose': -2, 'lost': -2, 'sick': -2, 'poor': -2, 'no': -1, 'nah': -1, 'boring': -2,
+            
+            // Emojis (New AI Feature)
+            '😀': 2, '😃': 2, '😄': 2, '😁': 2, '😆': 2, '😅': 1, '😂': 3, '🤣': 3, '😊': 2, '😇': 2, '🙂': 1, '🙃': 1, '😉': 1, '😌': 2, '😍': 4, '🥰': 4, '😘': 3, '😗': 2, '😙': 2, '😚': 2, '😋': 2, '😛': 1, '😝': 1, '😜': 2, '🤪': 2, '🤨': -1, '🧐': 0, '🤓': 1, '😎': 2, '🤩': 4, '🥳': 3, '😏': 0, '😒': -2, '😞': -2, '😔': -2, '😟': -2, '😕': -1, '🙁': -2, '😣': -2, '😖': -2, '😫': -3, '😩': -3, '🥺': -1, '😢': -3, '😭': -4, '😤': -2, '😠': -3, '😡': -4, '🤬': -5, '🤯': -1, '😳': -1, '🥵': -1, '🥶': -1, '😱': -3, '😨': -2, '😰': -2, '😥': -1, '😓': -1, '🤗': 2, '🤔': 0, '🤭': 1, '🤫': 0, '🤥': -2, '😶': 0, '😐': 0, '😑': -1, '😬': -1, '🙄': -1, '😯': 0, '😦': -1, '😧': -1, '😮': 0, '😲': 0, '🥱': -1, '😴': 0, '🤤': 0, '😪': 0, '😵': -1, '🤐': 0, '🥴': -1, '🤢': -3, '🤮': -4, '🤧': -1, '😷': -1, '🤒': -2, '🤕': -2, '🤑': 2, '🤠': 1, '😈': -1, '👿': -2, '👹': -2, '👺': -2, '🤡': 0, '💩': -2, '👻': 0, '💀': -1, '☠️': -2, '👽': 0, '👾': 0, '🤖': 0, '🎃': 1, '😺': 2, '😸': 2, '😹': 3, '😻': 3, '😼': 1, '😽': 2, '🙀': -1, '😿': -2, '😾': -2, '🤲': 1, '👐': 1, '🙌': 3, '👏': 3, '🤝': 2, '👍': 2, '👎': -2, '👊': -1, '✊': 1, '🤛': 0, '🤜': 0, '🤞': 2, '✌️': 2, '🤟': 3, '🤘': 2, '👌': 2, '🤏': 0, '👈': 0, '👉': 0, '👆': 0, '👇': 0, '☝️': 0, '✋': 0, '🤚': 0, '🖐': 0, '🖖': 1, '👋': 1, '🤙': 2, '💪': 3, '🦾': 0, '🖕': -5, '✍️': 0, '🙏': 2, '🦶': 0, '🦵': 0, '👂': 0, '🦻': 0, '👃': 0, '🧠': 0, '🦷': 0, '🦴': 0, '👀': 0, '👁': 0, '👅': 0, '👄': 0, '💋': 3, '🩸': -1, '💔': -4, '❤️': 4, '🧡': 4, '💛': 4, '💚': 4, '💙': 4, '💜': 4, '🖤': 0, '🤍': 0, '🤎': 0, '💯': 3, '💢': -2, '💥': -1, '💫': 2, '💦': 0, '💨': 0, '🕳': -1, '💣': -3, '💬': 0, '👁️‍🗨️': 0, '🗨️': 0, '🗯️': -1, '💭': 0, '💤': 0
+        };
+
+        // NEW: Relationship Lexicon for AI Prediction
+        const RELATIONSHIP_LEXICON = {
+            romantic: ['love', 'babe', 'baby', 'honey', 'dear', 'miss you', 'kiss', 'heart', '❤️', '😘', '😍', '💕', 'bubu', 'bae', 'sweetie', 'darling', 'cutie'],
+            professional: ['meeting', 'call', 'regards', 'approved', 'deadline', 'team', 'sir', 'madam', 'thanks', 'update', 'status', 'office', 'project', 'client', 'attach', 'mail', 'agenda'],
+            friendly: ['lol', 'lmao', 'bro', 'dude', 'haha', 'yeah', 'cool', 'nice', 'crazy', 'party', 'beer', 'hangout', 'buddy', 'bruh', 'lmfao', 'rofl', 'gossip']
+        };
+
+        // Stop words for Keyword Extraction
+        const STOP_WORDS = new Set(['the', 'and', 'to', 'of', 'a', 'in', 'is', 'that', 'for', 'it', 'you', 'i', 'me', 'my', 'on', 'with', 'this', 'was', 'at', 'are', 'be', 'have', 'but', 'as', 'if', 'so', 'not', 'or', 'can', 'will', 'just', 'what', 'do', 'from', 'we', 'your', 'about', 'out', 'up', 'an', 'when', 'all', 'how', 'one', 'has', 'had', 'been', 'there', 'they', 'go', 'get', 'did', 'like', 'know', 'see', 'time', 'well', 'too', 'very', 'u', 'ur', 'ok', 'okay', 'omitted', 'media', 'attached', 'image']);
+
         // --- THEME DEFINITIONS (50 Colors, excluding white) ---
         const THEME_OPTIONS = {
             color: [
@@ -535,6 +694,7 @@
             document.getElementById('senderSelectorModal').classList.add('hidden');
             chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
             pdfButton.disabled = true;
+            forensicDashboard.classList.add('hidden');
         }
 
         function parseChat(text, customUserName) {
@@ -618,6 +778,405 @@
             return messages;
         }
 
+        // --- NEW: FORENSIC ANALYTICS WITH AI ---
+        function analyzeSentiment(messages) {
+            let totalScore = 0;
+            messages.forEach(msg => {
+                // Word analysis
+                const words = msg.content.toLowerCase().match(/\w+/g) || [];
+                words.forEach(word => {
+                    if (SENTIMENT_LEXICON[word]) {
+                        totalScore += SENTIMENT_LEXICON[word];
+                    }
+                });
+                
+                // Emoji analysis (Smart AI Upgrade)
+                for (const char of msg.content) {
+                    if (SENTIMENT_LEXICON[char]) {
+                         totalScore += SENTIMENT_LEXICON[char];
+                    }
+                }
+            });
+            return totalScore;
+        }
+
+        function extractKeywords(messages) {
+            const wordCounts = {};
+            messages.forEach(msg => {
+                const words = msg.content.toLowerCase().match(/[a-z]{3,}/g) || [];
+                words.forEach(word => {
+                    if (!STOP_WORDS.has(word)) {
+                        wordCounts[word] = (wordCounts[word] || 0) + 1;
+                    }
+                });
+            });
+            
+            // Sort by frequency and take top 5
+            return Object.entries(wordCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(entry => entry[0]);
+        }
+        
+        // --- NEW: BEHAVIORAL PROFILING (Pattern Recognition AI) ---
+        function determinePersona(messages) {
+            if (!messages || messages.length === 0) return "Unknown";
+            
+            let totalLength = 0;
+            const hourCounts = {};
+            
+            messages.forEach(msg => {
+                totalLength += msg.content.length;
+                
+                // Extract Hour
+                const timeMatch = msg.datetime.match(/(\d{1,2}):\d{1,2}/);
+                if (timeMatch) {
+                    let hour = parseInt(timeMatch[1]);
+                    // Convert to 24h approximation if PM is detected
+                    if (msg.datetime.toLowerCase().includes('pm') && hour !== 12) hour += 12;
+                    if (msg.datetime.toLowerCase().includes('am') && hour === 12) hour = 0;
+                    
+                    hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+                }
+            });
+            
+            const avgLength = totalLength / messages.length;
+            
+            // Find Peak Hour
+            let peakHour = 0;
+            let maxHourCount = 0;
+            for (const [hour, count] of Object.entries(hourCounts)) {
+                if (count > maxHourCount) {
+                    maxHourCount = count;
+                    peakHour = parseInt(hour);
+                }
+            }
+            
+            // Classification Logic (Heuristics)
+            if (peakHour >= 0 && peakHour < 5) return "The Night Owl 🦉";
+            if (peakHour >= 5 && peakHour < 10) return "The Early Bird 🌅";
+            if (avgLength > 60) return "The Storyteller 📖";
+            if (avgLength < 15) return "The Minimalist ⚡";
+            if (peakHour >= 18 && peakHour <= 23) return "After-Hours Chatter 🌙";
+            
+            return "Balanced Communicator ⚖️";
+        }
+
+        // --- NEW: RELATIONSHIP PREDICTOR & BREAKDOWN (Heuristic AI) ---
+        function predictRelationship(messages) {
+            // Track global scores
+            let scores = { romantic: 0, professional: 0, friendly: 0 };
+            let lateNightCount = 0;
+            
+            // Track per-user scores to determine "Dominant Voice"
+            // Structure: { 'Alice': { romantic: 0, ... }, 'Bob': { ... } }
+            let userScores = {}; 
+
+            messages.forEach(msg => {
+                const sender = msg.sender;
+                const text = msg.content.toLowerCase();
+                
+                // Initialize user entry if not exists
+                if (!userScores[sender]) {
+                    userScores[sender] = { romantic: 0, professional: 0, friendly: 0 };
+                }
+
+                // Helper to increment both global and user specific scores
+                const increment = (category) => {
+                    scores[category]++;
+                    userScores[sender][category]++;
+                };
+
+                // Lexicon Check
+                RELATIONSHIP_LEXICON.romantic.forEach(w => { if(text.includes(w)) increment('romantic'); });
+                RELATIONSHIP_LEXICON.professional.forEach(w => { if(text.includes(w)) increment('professional'); });
+                RELATIONSHIP_LEXICON.friendly.forEach(w => { if(text.includes(w)) increment('friendly'); });
+
+                // Time Check (Global only for weighting relation type)
+                const timeMatch = msg.datetime.match(/(\d{1,2}):\d{1,2}/);
+                if (timeMatch) {
+                    let hour = parseInt(timeMatch[1]);
+                    if (msg.datetime.toLowerCase().includes('pm') && hour !== 12) hour += 12;
+                    if (msg.datetime.toLowerCase().includes('am') && hour === 12) hour = 0;
+                    if (hour >= 23 || hour <= 4) lateNightCount++;
+                }
+            });
+
+            // Global Weighting Logic
+            scores.romantic += (lateNightCount * 0.5); 
+            scores.friendly += (lateNightCount * 0.2); 
+
+            // Determine Winning Category
+            const maxScore = Math.max(scores.romantic, scores.professional, scores.friendly);
+            let resultType = "Acquaintances / Casual 👋";
+            let winningKey = null;
+
+            if (maxScore >= 3) {
+                if (scores.professional > scores.romantic && scores.professional > scores.friendly) {
+                    resultType = "Professional / Work 👔";
+                    winningKey = 'professional';
+                } else if (scores.romantic > scores.friendly) {
+                    resultType = "Romantic / Dating ❤️";
+                    winningKey = 'romantic';
+                } else {
+                    resultType = "Besties / Close Friends 👯";
+                    winningKey = 'friendly';
+                }
+            }
+
+            // Determine Breakdown (Who is talking that way?)
+            let breakdownText = "Balanced contribution";
+            if (winningKey) {
+                // Find user with max score in the winning category
+                let maxUserScore = -1;
+                let topUser = null;
+                let totalCategoryScore = 0;
+
+                for (const [user, uScores] of Object.entries(userScores)) {
+                    const s = uScores[winningKey];
+                    totalCategoryScore += s;
+                    if (s > maxUserScore) {
+                        maxUserScore = s;
+                        topUser = user;
+                    }
+                }
+
+                if (topUser && totalCategoryScore > 0) {
+                    const percent = Math.round((maxUserScore / totalCategoryScore) * 100);
+                    // e.g. "Driven by Alice (80%)"
+                    breakdownText = `Dominant voice: ${topUser} (${percent}%)`;
+                }
+            }
+
+            return { label: resultType, breakdown: breakdownText };
+        }
+
+        // --- NEW: DATE HELPER FOR GHOSTING DETECTION ---
+        function parseDate(dateStr) {
+            // Takes string like "12/05/2023, 10:30 PM" or "12/5/23..."
+            // Heuristic: Try standard JS Parse. If valid, return timestamp.
+            const attempt = Date.parse(dateStr);
+            if (!isNaN(attempt)) return attempt;
+            
+            // Simple manual parse for common whatsapp formats d/m/y or m/d/y
+            const parts = dateStr.split(/[^\d]/).filter(p => p);
+            if (parts.length >= 3) {
+                 return new Date(parts[2], parts[1]-1, parts[0]).getTime();
+            }
+            return 0; // Failure
+        }
+
+        function updateForensicDashboard(messages) {
+            if (!messages || messages.length === 0) {
+                forensicDashboard.classList.add('hidden');
+                return;
+            }
+
+            // 1. Total Messages
+            document.getElementById('stat-total-msgs').textContent = messages.length.toLocaleString();
+
+            // 2. Date Range
+            try {
+                const startDate = messages[0].datetime.split(/[,\s]/)[0];
+                const endDate = messages[messages.length - 1].datetime.split(/[,\s]/)[0];
+                document.getElementById('stat-date-range').textContent = `${startDate} - ${endDate}`;
+            } catch(e) {
+                document.getElementById('stat-date-range').textContent = "Unknown Range";
+            }
+
+            // 3. File Size
+            const sizeInKB = (loadedFileSize / 1024).toFixed(2);
+            document.getElementById('stat-file-size').textContent = `${sizeInKB} KB`;
+            
+            // 4. BEHAVIORAL PROFILING (AI)
+            const persona = determinePersona(messages);
+            const badge = document.getElementById('behavioral-badge');
+            badge.textContent = `Profile: ${persona}`;
+            badge.classList.remove('animate-pulse');
+
+            // --- NEW: ENGAGEMENT HEALTH (Ghosting & Dry Texting) ---
+            
+            // A. Dry Texting Logic
+            let dryCount = 0;
+            messages.forEach(m => {
+                if (m.content.length < 4 && !m.content.includes('<a')) dryCount++; // Less than 4 chars and not a link
+            });
+            const dryPercentage = Math.round((dryCount / messages.length) * 100);
+            document.getElementById('stat-dry-text').textContent = `${dryPercentage}%`;
+            
+            // B. Ghosting Logic (Longest Gap)
+            let maxGap = 0;
+            let prevTime = 0;
+            
+            for (let i = 0; i < messages.length; i++) {
+                const t = parseDate(messages[i].datetime);
+                if (t > 0) {
+                    if (prevTime > 0) {
+                        const gap = t - prevTime;
+                        if (gap > maxGap) maxGap = gap;
+                    }
+                    prevTime = t;
+                }
+            }
+            
+            let ghostingText = "N/A";
+            if (maxGap > 0) {
+                const days = Math.floor(maxGap / (1000 * 60 * 60 * 24));
+                if (days > 365) ghostingText = "> 1 Year";
+                else if (days > 30) ghostingText = `${Math.floor(days/30)} Months`;
+                else if (days > 0) ghostingText = `${days} Days`;
+                else {
+                    const hours = Math.floor(maxGap / (1000 * 60 * 60));
+                    ghostingText = `${hours} Hours`;
+                }
+            }
+            document.getElementById('stat-ghosting').textContent = ghostingText;
+
+            // --- NEW: RELATIONSHIP PREDICTION WITH BREAKDOWN ---
+            const predictionData = predictRelationship(messages);
+            document.getElementById('relationship-prediction').textContent = predictionData.label;
+            document.getElementById('relationship-breakdown').textContent = predictionData.breakdown;
+
+            // --- NEW: DAILY INITIATOR (Frequency Analysis) ---
+            // Tracks who sends the first message of each unique date
+            const dailyInitiators = {};
+            let processedDates = new Set();
+
+            messages.forEach(msg => {
+                let dateStr = 'Unknown';
+                try {
+                    // Normalize date string (same regex as render logic)
+                    dateStr = msg.datetime.split(/[,\s]/).filter(p => p.match(/\d/))[0] || msg.datetime.split(',')[0].trim();
+                } catch (e) { dateStr = 'Unknown'; }
+
+                if (!processedDates.has(dateStr)) {
+                    processedDates.add(dateStr);
+                    dailyInitiators[msg.sender] = (dailyInitiators[msg.sender] || 0) + 1;
+                }
+            });
+
+            let topInitiator = "N/A";
+            let maxStarts = 0;
+            const totalDays = processedDates.size;
+
+            for (const [sender, count] of Object.entries(dailyInitiators)) {
+                if (count > maxStarts) {
+                    maxStarts = count;
+                    topInitiator = sender;
+                }
+            }
+            
+            const startPercentage = totalDays > 0 ? Math.round((maxStarts / totalDays) * 100) : 0;
+
+            document.getElementById('origin-initiator').textContent = topInitiator;
+            document.getElementById('origin-date').textContent = `Starts conversation ${startPercentage}% of days (${maxStarts}/${totalDays})`;
+
+            // 5. Participant Stats
+            const counts = {};
+            messages.forEach(m => {
+                counts[m.sender] = (counts[m.sender] || 0) + 1;
+            });
+            
+            const statsContainer = document.getElementById('participant-stats');
+            statsContainer.innerHTML = '';
+            
+            const maxCount = Math.max(...Object.values(counts));
+            
+            Object.entries(counts).sort((a,b) => b[1] - a[1]).forEach(([sender, count]) => {
+                const percentage = Math.round((count / messages.length) * 100);
+                const barWidth = (count / maxCount) * 100;
+                
+                const row = document.createElement('div');
+                row.className = 'flex items-center text-sm';
+                row.innerHTML = `
+                    <div class="w-1/3 truncate font-medium text-gray-700 pr-2">${sender}</div>
+                    <div class="w-2/3 flex items-center">
+                        <div class="bg-blue-100 h-3 rounded-full overflow-hidden flex-grow mr-2">
+                            <div class="bg-blue-500 h-full" style="width: ${barWidth}%"></div>
+                        </div>
+                        <span class="text-xs text-gray-500 w-12 text-right">${count} (${percentage}%)</span>
+                    </div>
+                `;
+                statsContainer.appendChild(row);
+            });
+
+            // 6. AI Sentiment Analysis (Enhanced with Emojis)
+            const sentimentScore = analyzeSentiment(messages);
+            const sentimentLabelEl = document.getElementById('sentiment-label');
+            const sentimentBarEl = document.getElementById('sentiment-bar');
+            document.getElementById('sentiment-score').textContent = `Score: ${sentimentScore}`;
+            
+            let sentimentLabel = 'Neutral';
+            let barColor = 'bg-gray-400';
+            let barWidth = '50%'; // Middle
+
+            // Normalize score slightly for visualization (capped between -50 and 50 roughly for full bar movement)
+            const normalizedScore = Math.max(-100, Math.min(100, sentimentScore)); 
+            const percentagePos = 50 + (normalizedScore / 2); // 0 score = 50% width
+            barWidth = `${percentagePos}%`;
+
+            if (sentimentScore > 10) {
+                sentimentLabel = 'Positive';
+                sentimentLabelEl.className = 'text-sm font-semibold text-green-600';
+                barColor = 'bg-green-500';
+            } else if (sentimentScore < -10) {
+                sentimentLabel = 'Negative';
+                sentimentLabelEl.className = 'text-sm font-semibold text-red-600';
+                barColor = 'bg-red-500';
+            } else {
+                sentimentLabelEl.className = 'text-sm font-semibold text-gray-600';
+            }
+            
+            sentimentLabelEl.textContent = sentimentLabel;
+            sentimentBarEl.className = `${barColor} h-2.5 rounded-full transition-all duration-500`;
+            sentimentBarEl.style.width = barWidth;
+
+            // 7. AI Topic Extraction
+            const keywords = extractKeywords(messages);
+            const topicsContainer = document.getElementById('top-keywords');
+            topicsContainer.innerHTML = '';
+            
+            if (keywords.length > 0) {
+                keywords.forEach(word => {
+                    const chip = document.createElement('span');
+                    chip.className = 'bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded border border-indigo-200';
+                    chip.textContent = word;
+                    topicsContainer.appendChild(chip);
+                });
+            } else {
+                topicsContainer.innerHTML = '<span class="text-xs text-gray-400 italic">Not enough data</span>';
+            }
+
+            // Show Dashboard
+            forensicDashboard.classList.remove('hidden');
+        }
+
+        // --- FORENSIC FILTERING ---
+        function filterChat() {
+            const query = document.getElementById('forensicSearch').value.toLowerCase();
+            const bubbles = document.querySelectorAll('.chat-bubble');
+            const separators = document.querySelectorAll('.date-separator');
+
+            // 1. Filter Bubbles
+            bubbles.forEach(bubble => {
+                const text = bubble.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    bubble.style.display = 'flex';
+                } else {
+                    bubble.style.display = 'none';
+                }
+            });
+
+            // 2. Hide Date Separators if all their children (siblings in this view logic) are hidden? 
+            // Simplified logic: If search is active, hide all separators to avoid clutter. 
+            // If empty search, show them.
+            if (query.length > 0) {
+                separators.forEach(sep => sep.style.display = 'none');
+            } else {
+                separators.forEach(sep => sep.style.display = 'block');
+            }
+        }
+
         function renderChat(messages, customUserName) {
             chatContainer.innerHTML = '';
             
@@ -626,6 +1185,9 @@
                 pdfButton.disabled = true;
                 return;
             }
+
+            // --- UPDATE FORENSIC DASHBOARD ---
+            updateForensicDashboard(messages);
 
             let lastDateOnly = null;
 
@@ -706,6 +1268,8 @@
             const file = event.target.files[0];
             if (!file) return;
 
+            loadedFileSize = file.size; // Capture size for forensic stats
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 currentChatText = e.target.result; 
@@ -717,6 +1281,7 @@
                     if (document.getElementById('senderSelectorModal').classList.contains('hidden')) {
                         chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
                         pdfButton.disabled = true;
+                        forensicDashboard.classList.add('hidden');
                     }
                 }
             };
