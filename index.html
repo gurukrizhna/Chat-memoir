@@ -254,11 +254,10 @@
     <div id="pdf-cover-page" class="hidden print:flex h-[100vh] w-full flex-col justify-center items-center text-center p-8 bg-white">
         <!-- App Name: Big size, Green color, Center aligned -->
         <h1 class="text-6xl sm:text-7xl font-extrabold mb-6 tracking-wide" style="color: #10b981; margin-top: -10vh;">Chat Memoir</h1>
-        <h2 class="text-2xl sm:text-3xl text-gray-500 mb-6 tracking-wide">Forensic Visualization Report</h2>
         <!-- Developer Name: Medium size, Normal color, Center aligned -->
         <p class="text-xl sm:text-2xl text-gray-700 mb-2">A utility by NGK</p>
         <!-- Contact: Medium size, Normal color, Center aligned -->
-        <p class="text-lg sm:text-xl text-gray-500">Contact: @gurukrizhna</p>
+        <p class="text-lg sm:text-xl text-gray-500">Contact: @gurukrizhna (Insta, X, YouTube, etc)</p>
     </div>
     
     <!-- SPLASH SCREEN: Fixed, White, Centered -->
@@ -368,7 +367,8 @@
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase">Longest Silence</p>
                             <p class="text-lg font-bold text-gray-800" id="stat-ghosting">-</p>
-                            <p class="text-[10px] text-gray-500">(Ghosting Detector)</p>
+                            <!-- UPDATED: Avg Gap Text -->
+                            <p class="text-[10px] text-gray-500" id="stat-avg-gap">Avg Gap: -</p>
                         </div>
                     </div>
                 </div>
@@ -1004,8 +1004,10 @@
             const dryPercentage = Math.round((dryCount / messages.length) * 100);
             document.getElementById('stat-dry-text').textContent = `${dryPercentage}%`;
             
-            // B. Ghosting Logic (Longest Gap)
+            // B. Ghosting Logic (Longest Gap & Average Gap)
             let maxGap = 0;
+            let totalGap = 0;
+            let gapCount = 0;
             let prevTime = 0;
             
             for (let i = 0; i < messages.length; i++) {
@@ -1013,12 +1015,17 @@
                 if (t > 0) {
                     if (prevTime > 0) {
                         const gap = t - prevTime;
-                        if (gap > maxGap) maxGap = gap;
+                        if (gap >= 0) { // Only positive gaps
+                            if (gap > maxGap) maxGap = gap;
+                            totalGap += gap;
+                            gapCount++;
+                        }
                     }
                     prevTime = t;
                 }
             }
             
+            // Format Max Gap (Ghosting)
             let ghostingText = "N/A";
             if (maxGap > 0) {
                 const days = Math.floor(maxGap / (1000 * 60 * 60 * 24));
@@ -1031,6 +1038,22 @@
                 }
             }
             document.getElementById('stat-ghosting').textContent = ghostingText;
+
+            // Format Average Gap
+            let avgGapText = "Avg Gap: -";
+            if (gapCount > 0) {
+                const avgGap = totalGap / gapCount;
+                if (avgGap > (1000 * 60 * 60 * 24)) {
+                    avgGapText = `Avg Gap: ${Math.round(avgGap / (1000 * 60 * 60 * 24))} Days`;
+                } else if (avgGap > (1000 * 60 * 60)) {
+                    avgGapText = `Avg Gap: ${Math.round(avgGap / (1000 * 60 * 60))} Hours`;
+                } else if (avgGap > (1000 * 60)) {
+                    avgGapText = `Avg Gap: ${Math.round(avgGap / (1000 * 60))} Mins`;
+                } else {
+                    avgGapText = `Avg Gap: < 1 Min`;
+                }
+            }
+            document.getElementById('stat-avg-gap').textContent = avgGapText;
 
             // --- NEW: RELATIONSHIP PREDICTION WITH BREAKDOWN ---
             const predictionData = predictRelationship(messages);
