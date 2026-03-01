@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Memoir - Forensic Edition</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Use Inter font family -->
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
@@ -179,7 +183,7 @@
                 width: 100% !important; height: auto !important; min-height: 100vh !important;
                 background-color: var(--print-bg-color, white) !important;
                 background-image: var(--print-bg-image, none) !important; 
-                background-size: contain !important; 
+                background-size: cover !important; /* Forces cropped image to fit perfectly */
                 background-position: center center !important;
                 background-repeat: no-repeat !important;
                 background-attachment: fixed !important;
@@ -212,9 +216,11 @@
             .date-separator { font-size: 10pt !important; }
             .time-subscript { vertical-align: sub !important; font-size: 8pt !important; display: inline-block !important; }
             .chat-screen-view { display: block; }
+
+            /* Ensure media constraints on print */
+            .media-image-print { max-width: 250px !important; height: auto !important; border-radius: 8px !important; }
         }
     </style>
-    <!-- Firebase Imports for required environment setup -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -250,37 +256,27 @@
 </head>
 <body>
 
-    <!-- NEW: PDF PRINT COVER PAGE -->
     <div id="pdf-cover-page" class="hidden print:flex h-[100vh] w-full flex-col justify-center items-center text-center p-8 bg-white">
-        <!-- App Name: Big size, Green color, Center aligned -->
         <h1 class="text-6xl sm:text-7xl font-extrabold mb-6 tracking-wide" style="color: #10b981; margin-top: -10vh;">Chat Memoir</h1>
-        <!-- Developer Name: Medium size, Normal color, Center aligned -->
         <p class="text-xl sm:text-2xl text-gray-700 mb-2">A utility by NGK</p>
-        <!-- Contact: Medium size, Normal color, Center aligned -->
         <p class="text-lg sm:text-xl text-gray-500">Contact: @gurukrizhna (Insta, X, YouTube, etc)</p>
     </div>
     
-    <!-- SPLASH SCREEN: Fixed, White, Centered -->
     <div id="splash-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
         <h1 class="text-4xl font-bold text-gray-800 mb-2 splash-element" style="animation-delay: 0s;">Chat Memoir</h1>
         
-        <!-- Simplified text: Professional and simple -->
         <p class="text-base text-gray-500 mb-8 splash-element" style="animation-delay: 0.2s;">
             A utility by <span class="font-semibold text-gray-700">NGK</span>
         </p>
 
-        <!-- Loading Spinner: Now visible immediately and running (splash-element removed) -->
         <div class="loader"></div>
         <p class="text-xs text-gray-400 mt-4">Initializing Secure Client-Side Environment...</p>
     </div>
     
-    <!-- MAIN APP CONTENT (Initially hidden, opacity 0, padding defined in style block) -->
     <div id="main-content" class="opacity-0 transition-opacity duration-700">
         <div class="max-w-7xl mx-auto">
-            <!-- New Title (No animation, fixed) -->
             <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center no-print">Chat Memoir</h1>
             
-            <!-- Secure Banner -->
             <div class="flex justify-center mb-4 no-print">
                 <span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded border border-green-400 flex items-center">
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
@@ -288,31 +284,24 @@
                 </span>
             </div>
             
-            <!-- Control Panel (Compact and Mobile-Optimized) -->
             <div class="bg-white p-3 rounded-xl shadow-lg mb-3 no-print">
                 
-                <!-- Import File Section -->
                 <div class="mb-4">
-                    <label for="chatFile" class="block text-sm font-medium text-gray-700 mb-1">Import Chat File (.txt)</label>
-                    <input type="file" id="chatFile" accept=".txt" class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 p-2">
+                    <label for="chatFile" class="block text-sm font-medium text-gray-700 mb-1">Import Chat File (.txt or .zip)</label>
+                    <input type="file" id="chatFile" accept=".txt,.zip" class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 p-2">
                 </div>
 
-                <!-- Theme Selection & Generate Button -->
                 <div class="md:grid md:grid-cols-4 md:gap-4 flex flex-col">
                     
-                    <!-- Theme Section (Simplified - Color Only) -->
                     <div class="md:col-span-3 mb-4 md:mb-0">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Theme</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Theme Color</label>
                         
-                        <!-- Theme Gallery Container -->
                         <div class="theme-gallery-container">
                             <div id="themeSelectorGallery" class="theme-gallery-inner">
-                                <!-- Theme buttons will be injected here by JavaScript -->
-                            </div>
+                                </div>
                         </div>
                     </div>
 
-                    <!-- Generate Button (Renamed) -->
                     <div class="md:col-span-1 flex items-end">
                         <button onclick="generatePdf()" id="pdfButton"
                             class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-150 ease-in-out shadow-md disabled:opacity-50"
@@ -321,9 +310,16 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="bgImageFile" class="block text-sm font-medium text-gray-700">Custom Background Image (Auto-crops to A4)</label>
+                        <button onclick="clearBgImage()" class="text-xs text-red-500 hover:text-red-700 hidden" id="clearBgBtn">Clear Image</button>
+                    </div>
+                    <input type="file" id="bgImageFile" accept="image/*" class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 p-2">
+                </div>
             </div>
             
-            <!-- FORENSIC ANALYSIS DASHBOARD (New Feature) -->
             <div id="forensic-dashboard" class="bg-gray-100 p-4 rounded-xl shadow-inner mb-4 no-print hidden border border-gray-200">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
@@ -331,31 +327,26 @@
                         Forensic Analysis Data
                     </h3>
                     
-                    <!-- New Behavioral Badge -->
                     <span id="behavioral-badge" class="bg-indigo-600 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-sm animate-pulse">
                         Analyzing...
                     </span>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                    <!-- Stat Card 1 -->
                     <div class="bg-white p-3 rounded shadow-sm border-l-4 border-blue-500">
                         <p class="text-xs text-gray-500 uppercase">Total Messages</p>
                         <p class="text-xl font-bold text-gray-800" id="stat-total-msgs">-</p>
                     </div>
-                    <!-- Stat Card 2 -->
                     <div class="bg-white p-3 rounded shadow-sm border-l-4 border-purple-500">
                         <p class="text-xs text-gray-500 uppercase">Date Range</p>
                         <p class="text-xs font-bold text-gray-800 truncate" id="stat-date-range">-</p>
                     </div>
-                    <!-- Stat Card 3 -->
                     <div class="bg-white p-3 rounded shadow-sm border-l-4 border-orange-500">
                         <p class="text-xs text-gray-500 uppercase">File Size</p>
                         <p class="text-xl font-bold text-gray-800" id="stat-file-size">-</p>
                     </div>
                 </div>
 
-                <!-- Engagement Health: Dry Texting & Ghosting (NEW CARD) -->
                 <div class="bg-white p-3 rounded shadow-sm mb-4 border-l-4 border-red-400">
                     <p class="text-xs text-gray-500 uppercase mb-2">Engagement Health</p>
                     <div class="grid grid-cols-2 gap-2">
@@ -367,27 +358,22 @@
                         <div>
                             <p class="text-[10px] text-gray-400 uppercase">Longest Silence</p>
                             <p class="text-lg font-bold text-gray-800" id="stat-ghosting">-</p>
-                            <!-- UPDATED: Avg Gap Text -->
                             <p class="text-[10px] text-gray-500" id="stat-avg-gap">Avg Gap: -</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Relationship Prediction & Origin (Modified) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <!-- Relationship Prediction Card -->
                     <div class="bg-white p-3 rounded shadow-sm border-l-4 border-teal-500">
                         <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                             AI Relationship Prediction
                         </p>
                         <p class="text-lg font-bold text-gray-800" id="relationship-prediction">Analyzing...</p>
-                        <!-- New: Breakdown Text -->
                         <p class="text-[11px] text-teal-600 mt-1 font-semibold" id="relationship-breakdown">-</p>
                         <p class="text-[10px] text-gray-400 italic">Based on vocabulary &amp; timing</p>
                     </div>
 
-                    <!-- NEW: Conversation Origin Card (Updated to Daily Initiator) -->
                     <div class="bg-white p-3 rounded shadow-sm border-l-4 border-yellow-500">
                         <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -401,17 +387,13 @@
                     </div>
                 </div>
 
-                <!-- Participant Activity -->
                 <div class="bg-white p-3 rounded shadow-sm mb-4">
                     <p class="text-xs text-gray-500 uppercase mb-2">Participant Activity</p>
                     <div id="participant-stats" class="space-y-2">
-                        <!-- Bars injected via JS -->
-                    </div>
+                        </div>
                 </div>
 
-                <!-- AI Sentiment & Keyword Analysis -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <!-- Sentiment Card -->
                     <div class="bg-white p-3 rounded shadow-sm border-t-4 border-pink-500">
                         <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -426,20 +408,17 @@
                         </div>
                     </div>
                     
-                    <!-- Top Keywords Card -->
                     <div class="bg-white p-3 rounded shadow-sm border-t-4 border-indigo-500">
                         <p class="text-xs text-gray-500 uppercase mb-2 flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
                             Top Topics (AI Extracted)
                         </p>
                         <div id="top-keywords" class="flex flex-wrap gap-1">
-                            <!-- Chips injected via JS -->
                             <span class="text-xs text-gray-400 italic">Analyzing...</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Forensic Search -->
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -450,43 +429,48 @@
                 </div>
             </div>
             
-            <!-- Error/Status Message -->
             <p id="statusMessage" class="text-center text-red-500 mb-4 no-print hidden">
                 Please import a chat file first.
             </p>
 
-            <!-- Chat Preview and Print Container -->
             <div class="w-full flex justify-center">
-                <div id="chat-container" class="chat-screen-view rounded-2xl">
-                    <!-- Messages will be rendered here -->
+                <div id="chat-container" class="chat-screen-view rounded-2xl transition-all duration-300">
                     <p class="text-center text-gray-500 mt-20" id="initial-message">
-                        Import your WhatsApp chat (.txt) file above to see the conversation here.
+                        Import your WhatsApp chat (.txt or .zip) file above to see the conversation here.
                     </p>
                 </div>
             </div>
 
-            <!-- Developer and Insta Handle (MOVED TO BOTTOM, simplified text) -->
             <p class="text-center text-xs text-gray-500 mt-6 pt-3 border-t border-gray-200 no-print">
                 A utility by <span class="font-semibold text-gray-700">NGK</span> | Instagram: <a href="https://www.instagram.com/gurukrizhna" target="_blank" class="text-blue-500 hover:text-blue-600 transition">@gurukrizhna</a>
             </p>
         </div>
         
-        <!-- SENDER SELECTION MODAL (Adjusted for bottom access) -->
         <div id="senderSelectorModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-end justify-center p-8">
             <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
                 <h3 class="text-xl font-bold text-gray-800 mb-4">Identify Yourself</h3>
-                <!-- Simplified inner content -->
                 <p id="senderSelectionMessage" class="text-sm text-gray-600 mb-4 font-semibold">
                     Select your name to proceed:
                 </p>
                 <div id="senderOptions" class="space-y-3">
-                    <!-- Sender buttons generated here -->
-                </div>
+                    </div>
                 <button onclick="closeSenderSelection()" 
                         class="w-full mt-4 px-4 py-2 text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-150">
                     Cancel and Check File
                 </button>
             </div>
+        </div>
+    </div>
+
+    <div id="cropperModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-95 z-[60] flex flex-col items-center justify-center p-4">
+        <h3 class="text-white text-xl font-bold mb-4">Crop Background for A4 PDF</h3>
+        <p class="text-gray-300 text-sm mb-4">Crop this image. A dark overlay will automatically be applied to ensure text stays readable.</p>
+        <div class="w-full max-w-2xl bg-black rounded-lg overflow-hidden flex items-center justify-center" style="height: 60vh;">
+            <img id="cropperImage" src="" alt="Image to crop" class="max-w-full block">
+        </div>
+        <div class="flex gap-4 mt-6">
+            <button onclick="cancelCrop()" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow-md transition-all">Cancel</button>
+            <button onclick="applyCrop()" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md transition-all">Crop & Apply Background</button>
         </div>
     </div>
 
@@ -500,6 +484,7 @@
         let currentChatText = ''; 
         let currentCustomUserName = 'You'; 
         let loadedFileSize = 0; // For metadata
+        let mediaUrls = {}; // Store extracted zip media URLs
         
         // --- CLIENT-SIDE AI DATASETS ---
         // Enhanced Sentiment Lexicon (Including Emojis for "Smart" AI)
@@ -604,7 +589,10 @@
 
         function selectTheme(theme, element) {
             selectedTheme = theme;
-            document.documentElement.style.setProperty('--print-bg-image', 'none'); 
+            // Only clear the image if the user hasn't explicitly uploaded a custom background image
+            if (document.getElementById('bgImageFile').value === "") {
+                document.documentElement.style.setProperty('--print-bg-image', 'none'); 
+            }
             document.documentElement.style.setProperty('--print-bg-color', theme.value);
 
             document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
@@ -692,7 +680,7 @@
 
         function closeSenderSelection() {
             document.getElementById('senderSelectorModal').classList.add('hidden');
-            chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
+            chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt or .zip) file above to see the conversation here.</p>';
             pdfButton.disabled = true;
             forensicDashboard.classList.add('hidden');
         }
@@ -1200,11 +1188,47 @@
             }
         }
 
+        // --- NEW: VIDEO THUMBNAIL GENERATOR ---
+        function generateVideoThumbnail(blobUrl, filename) {
+            const video = document.createElement('video');
+            video.src = blobUrl;
+            video.muted = true;
+            video.playsInline = true;
+            video.preload = "metadata";
+
+            video.onloadeddata = () => {
+                // Seek to a safe frame (1 sec in, or halfway if short)
+                video.currentTime = Math.min(1, video.duration / 2);
+            };
+
+            video.onseeked = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const thumbImg = document.getElementById(`thumb-${filename}`);
+                if (thumbImg) {
+                    thumbImg.src = canvas.toDataURL('image/jpeg', 0.8);
+                    thumbImg.classList.remove('hidden');
+                    thumbImg.parentElement.classList.remove('min-h-[150px]'); // remove loader height
+                }
+                
+                const durDiv = document.getElementById(`dur-${filename}`);
+                if (durDiv && !isNaN(video.duration)) {
+                    const mins = Math.floor(video.duration / 60);
+                    const secs = Math.floor(video.duration % 60).toString().padStart(2, '0');
+                    durDiv.innerText = `${mins}:${secs}`;
+                }
+            };
+        }
+
         function renderChat(messages, customUserName) {
             chatContainer.innerHTML = '';
             
             if (messages.length === 0) {
-                chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
+                chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt or .zip) file above to see the conversation here.</p>';
                 pdfButton.disabled = true;
                 return;
             }
@@ -1232,7 +1256,7 @@
                 }
 
                 const bubbleDiv = document.createElement('div');
-                const contentP = document.createElement('p');
+                const contentP = document.createElement('div'); // Changed to div to hold block elements like images
                 const footerSpan = document.createElement('span'); 
 
                 const bubbleClass = msg.isMe ? 'bubble-me' : 'bubble-contact';
@@ -1257,19 +1281,83 @@
                 const messageContentWrapper = document.createElement('div');
                 messageContentWrapper.className = 'flex flex-wrap items-end w-full'; 
                 
-                contentP.className = `text-sm ${senderColor} pr-1`; 
+                contentP.className = `text-sm ${senderColor} pr-1 w-full`; 
                 contentP.style.flex = '1 1 auto'; 
                 contentP.style.wordBreak = 'break-word';
 
-                // Hyperlink detection
-                const contentWithLinks = msg.content.replace(
+                // --- NEW: MEDIA DETECTION & RENDERING ---
+                // Remove invisible characters that WhatsApp sometimes injects
+                let cleanedRawText = msg.content.replace(/[\u200E\u200F]/g, '');
+                
+                const mediaRegex = /([a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|webp|mp4|opus|ogg|m4a|mp3))/i;
+                const mediaMatch = cleanedRawText.match(mediaRegex);
+                
+                let injectedMediaHtml = '';
+
+                if (mediaMatch && mediaUrls[mediaMatch[1]]) {
+                    const filename = mediaMatch[1];
+                    const blobUrl = mediaUrls[filename];
+                    const ext = filename.split('.').pop().toLowerCase();
+                    
+                    // Hide the filename text and the "(file attached)" string from the bubble
+                    cleanedRawText = cleanedRawText
+                        .replace(mediaMatch[0], '')
+                        .replace(/\(file attached\)/i, '')
+                        .replace(/•\s*attached/i, '')
+                        .trim();
+
+                    if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                        injectedMediaHtml = `<img src="${blobUrl}" class="w-full max-w-[250px] h-auto rounded-lg mt-1 mb-1 media-image-print shadow-sm" />`;
+                    } else if (['mp4'].includes(ext)) {
+                        injectedMediaHtml = `
+                            <div class="relative rounded-lg overflow-hidden my-1 w-[250px] bg-gray-900 flex items-center justify-center min-h-[150px] shadow-sm media-image-print">
+                                <img id="thumb-${filename}" src="" class="w-full h-auto opacity-70 hidden" />
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center text-white backdrop-blur-sm">
+                                        <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </div>
+                                </div>
+                                <div id="dur-${filename}" class="absolute bottom-1 left-2 text-white text-[10px] font-bold drop-shadow-md">Video</div>
+                            </div>
+                        `;
+                        generateVideoThumbnail(blobUrl, filename);
+                    } else if (['opus', 'ogg', 'm4a', 'mp3'].includes(ext)) {
+                        const iconColorClass = msg.isMe ? 'text-green-600' : 'text-blue-500';
+                        const dotColorClass = msg.isMe ? 'bg-green-500' : 'bg-blue-400';
+                        injectedMediaHtml = `
+                            <div class="flex items-center gap-2 bg-black/5 rounded-full p-1.5 my-1 min-w-[200px]">
+                                <div class="w-8 h-8 rounded-full bg-white flex shrink-0 items-center justify-center shadow-sm">
+                                    <svg class="w-5 h-5 ml-0.5 ${iconColorClass}" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-center">
+                                    <div class="h-1.5 bg-black/20 rounded-full w-full relative overflow-hidden">
+                                        <div class="absolute left-0 top-0 h-full w-1/3 ${dotColorClass} rounded-full"></div>
+                                        <div class="absolute left-[33%] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full ${dotColorClass} shadow"></div>
+                                    </div>
+                                </div>
+                                <div class="w-6 h-6 shrink-0 flex items-center justify-center text-gray-400">
+                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.3 6-6.72h-1.7z"/></svg>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Hyperlink detection for remaining text
+                let contentWithLinks = cleanedRawText.replace(
                     /(https?:\/\/[^\s]+)/g, 
                     (url) => `<a href="${url}" target="_blank" class="text-blue-500 underline">${url}</a>`
                 );
 
-                contentP.innerHTML = contentWithLinks.replace(/\n/g, '<br>');
+                // Combine media and text
+                let finalHtml = injectedMediaHtml;
+                if (contentWithLinks.length > 0) {
+                    finalHtml += contentWithLinks.replace(/\n/g, '<br>');
+                }
 
-                footerSpan.className = 'time-subscript whitespace-nowrap ml-auto'; 
+                contentP.innerHTML = finalHtml;
+
+                footerSpan.className = 'time-subscript whitespace-nowrap ml-auto pt-1'; 
                 let timeMatch = msg.datetime.match(/\d{1,2}:\d{1,2}(?::\d{1,2})?(\s(?:AM|PM|am|pm))?/i);
                 footerSpan.textContent = timeMatch ? timeMatch[0] : '??:??';
                 
@@ -1286,29 +1374,76 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Event listener for chat file upload
+        // --- UPDATED: ZIP AND TEXT FILE HANDLING ---
         chatFile.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (!file) return;
 
             loadedFileSize = file.size; // Capture size for forensic stats
+            mediaUrls = {}; // Reset previous media
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                currentChatText = e.target.result; 
-                
-                const messages = parseChat(currentChatText, currentCustomUserName);
-                if (messages.length > 0) {
-                    renderChat(messages, currentCustomUserName);
-                } else {
-                    if (document.getElementById('senderSelectorModal').classList.contains('hidden')) {
-                        chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt) file above to see the conversation here.</p>';
-                        pdfButton.disabled = true;
-                        forensicDashboard.classList.add('hidden');
+            if (file.name.toLowerCase().endsWith('.zip')) {
+                const zip = new JSZip();
+                zip.loadAsync(file).then(function(contents) {
+                    let txtFileName = null;
+                    let promises = [];
+                    
+                    Object.keys(contents.files).forEach(function(filename) {
+                        if (!contents.files[filename].dir) {
+                            if (filename.toLowerCase().endsWith('.txt') && !txtFileName) {
+                                // Only grab the first txt file (usually _chat.txt)
+                                txtFileName = filename;
+                            } else {
+                                // Extract potential media
+                                promises.push(
+                                    contents.files[filename].async("blob").then(function(blob) {
+                                        // Use just the filename without paths if any exist
+                                        const cleanName = filename.split('/').pop();
+                                        mediaUrls[cleanName] = URL.createObjectURL(blob);
+                                    })
+                                );
+                            }
+                        }
+                    });
+                    
+                    Promise.all(promises).then(() => {
+                        if (txtFileName) {
+                            contents.files[txtFileName].async("string").then(function(text) {
+                                currentChatText = text;
+                                const messages = parseChat(currentChatText, currentCustomUserName);
+                                if (messages.length > 0) {
+                                    renderChat(messages, currentCustomUserName);
+                                }
+                            });
+                        } else {
+                            statusMessage.textContent = "Error: No .txt file found inside the ZIP.";
+                            statusMessage.classList.remove('hidden');
+                        }
+                    });
+                }).catch(err => {
+                    statusMessage.textContent = "Error extracting ZIP file.";
+                    statusMessage.classList.remove('hidden');
+                });
+
+            } else {
+                // Normal .txt file processing
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentChatText = e.target.result; 
+                    
+                    const messages = parseChat(currentChatText, currentCustomUserName);
+                    if (messages.length > 0) {
+                        renderChat(messages, currentCustomUserName);
+                    } else {
+                        if (document.getElementById('senderSelectorModal').classList.contains('hidden')) {
+                            chatContainer.innerHTML = '<p class="text-center text-gray-500 mt-20" id="initial-message">Import your WhatsApp chat (.txt or .zip) file above to see the conversation here.</p>';
+                            pdfButton.disabled = true;
+                            forensicDashboard.classList.add('hidden');
+                        }
                     }
-                }
-            };
-            reader.readAsText(file);
+                };
+                reader.readAsText(file);
+            }
         });
         
         // Function to trigger PDF generation
@@ -1319,6 +1454,83 @@
                 statusMessage.textContent = "Please import a valid chat file before generating the PDF.";
                 statusMessage.classList.remove('hidden');
             }
+        }
+
+        // --- CROPPER & BACKGROUND LOGIC ---
+        const bgImageFile = document.getElementById('bgImageFile');
+        const clearBgBtn = document.getElementById('clearBgBtn');
+        const cropperModal = document.getElementById('cropperModal');
+        const cropperImage = document.getElementById('cropperImage');
+        let cropperInstance = null;
+
+        bgImageFile.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropperImage.src = e.target.result;
+                cropperModal.classList.remove('hidden');
+                
+                if (cropperInstance) {
+                    cropperInstance.destroy();
+                }
+                
+                // Initialize cropper with A4 aspect ratio
+                cropperInstance = new Cropper(cropperImage, {
+                    aspectRatio: 1 / 1.414, // A4 ratio
+                    viewMode: 1,
+                    autoCropArea: 1,
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function cancelCrop() {
+            cropperModal.classList.add('hidden');
+            if (cropperInstance) cropperInstance.destroy();
+            bgImageFile.value = ''; // Reset file input
+        }
+
+        function applyCrop() {
+            if (!cropperInstance) return;
+            
+            // Get cropped canvas
+            const canvas = cropperInstance.getCroppedCanvas({
+                width: 794,  // Standard A4 width at 96dpi
+                height: 1123 // Standard A4 height at 96dpi
+            });
+
+            // Add dark shadow overlay directly to the canvas image
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // 60% black overlay to dim image
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Convert canvas to data URL (JPEG to save space)
+            const finalDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+            // Apply to print CSS
+            document.documentElement.style.setProperty('--print-bg-image', `url(${finalDataUrl})`);
+            
+            // Show preview on screen view
+            document.getElementById('chat-container').style.backgroundImage = `url(${finalDataUrl})`;
+            document.getElementById('chat-container').style.backgroundSize = 'cover';
+            document.getElementById('chat-container').style.backgroundPosition = 'center';
+            document.getElementById('chat-container').style.backgroundAttachment = 'fixed';
+            
+            clearBgBtn.classList.remove('hidden');
+            
+            // Cleanup UI
+            cropperModal.classList.add('hidden');
+            cropperInstance.destroy();
+        }
+
+        function clearBgImage() {
+            // Clear the input and remove background image from view/print
+            bgImageFile.value = '';
+            document.documentElement.style.setProperty('--print-bg-image', 'none');
+            document.getElementById('chat-container').style.backgroundImage = 'none';
+            clearBgBtn.classList.add('hidden');
         }
     </script>
 </body>
